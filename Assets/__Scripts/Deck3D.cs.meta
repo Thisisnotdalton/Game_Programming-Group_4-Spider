@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e31cc914e7053304aba7dd1758db6210
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - deckXML: {fileID: 4900000, guid: c76312a0fb08948699e1abf935e4a957, type: 3}
+  - suitClub: {fileID: 2100000, guid: 14bce90524f34b146bc26ebe317912f7, type: 2}
+  - suitDiamond: {fileID: 2100000, guid: 27d5f03f98215a3458708d08bf33e670, type: 2}
+  - suitHeart: {fileID: 2100000, guid: f0ebe20389a1e264e80a3b3977436d6a, type: 2}
+  - suitSpade: {fileID: 2100000, guid: 385248a4b855b9242a35059fd265dbf8, type: 2}
+  - rankMats: {fileID: 21300000, guid: a3dfadce2ec324208b9305ffd5119ba8, type: 3}
+  - prefabPlane: {fileID: 170968, guid: e2a866a056ed5374597740170c5c973d, type: 2}
+  - prefabCard: {fileID: 161968, guid: dc5527ec90ee8944a9b3109ff5436f6f, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 

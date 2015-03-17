@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 088d4f86f0b578e43b5ef47065b9dfd5
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - suitClub: {fileID: 21300000, guid: f2e3abd22e9ae4d17ab5c0659ff3e024, type: 3}
+  - suitDiamond: {fileID: 21300000, guid: f8c2745f3b53149c595d8fde43185468, type: 3}
+  - suitHeart: {fileID: 21300000, guid: 3f3ffa8970b63467cad6ba98725b1c95, type: 3}
+  - suitSpade: {fileID: 21300000, guid: a7994da692eef4500be008b80674eecb, type: 3}
+  - cardBack: {fileID: 21300000, guid: a8185ed8d47594bb8a3b8e2d9233f769, type: 3}
+  - cardFront: {fileID: 21300000, guid: 873a7658b7ec742228520c7b15510f4d, type: 3}
+  - prefabSprite: {fileID: 139340, guid: 0de7cce0f37bcb144976cc0595acd8f8, type: 2}
+  - prefabCard: {fileID: 139340, guid: ee0072e70774e904a9c8e6cac0fc8441, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
