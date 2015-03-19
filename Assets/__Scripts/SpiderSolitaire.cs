@@ -1,9 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+//an enum to handle all the possible scoring events
+public enum ScoreEvent{
+	draw,
+	mine,
+	mineGold,
+	gameWin,
+	gameLoss
+}
 
 public class SpiderSolitaire : MonoBehaviour {
-	static public Prospector S;
+	static public SpiderSolitaire S;
 	static public int SCORE_FROM_PREV_ROUND=0;
 	static public int HIGH_SCORE = 0;
 	

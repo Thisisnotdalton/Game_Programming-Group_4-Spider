@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+/*
 //an enum to handle all the possible scoring events
 public enum ScoreEvent{
 	draw,
@@ -10,7 +10,7 @@ public enum ScoreEvent{
 	gameWin,
 	gameLoss
 }
-
+*/
 public class Prospector : MonoBehaviour {
 	static public Prospector S;
 	static public int SCORE_FROM_PREV_ROUND=0;

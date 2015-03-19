@@ -49,6 +49,13 @@ public class CardSolitaire : Card {
 		greaterCard = other;
 		//set this card to be a child of the previous card
 		transform.parent = greaterCard.transform;
+		//align this card to the one above it
+		Vector3 pos = transform.localPosition;
+		pos.x = 0; //they are in line now
+		pos.y -= transform.lossyScale.y/4; //offset y so the card above is slightly visible
+		pos.z = 1;//this card is one above the other card
+		transform.localPosition = pos; //store this into local position
+		SetSortOrder (greaterCard.GetTopSortOrder () + 1); //set this card to be the layer above the card it's on top of
 	}
 	
 	///check if we have a complete stack of cards
@@ -88,6 +95,15 @@ public class CardSolitaire : Card {
 			currentCard.active=false;
 			currentCard.Move(Vector3.zero,0.25f);
 		}
+	}
+
+	public int GetTopSortOrder(){
+		//iterate through all sprite renderers and find the lowest sprite renderer sorting order to find the top layer of this card
+		int topLayer = 0;
+		foreach (SpriteRenderer tSR in spriteRenderers) {
+				topLayer=(tSR.sortingOrder>topLayer?topLayer:tSR.sortingOrder);
+		}
+		return topLayer;
 	}
 	
 }
