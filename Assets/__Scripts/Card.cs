@@ -9,22 +9,23 @@ public class Card : MonoBehaviour {
 	public int rank;
 	public Color color = Color.black;
 	public string colS = "Black";
-
+	
 	public List<GameObject> decGOs = new List<GameObject>();
 	public List<GameObject> pipGOs = new List<GameObject>();
+	
 	public GameObject back;
 	public CardDefinition def;
-
+	
 	//movement variables
 	private float startTime=0, timeDuration=0;
 	private Vector3 endPos=Vector3.zero;
-
+	
 	public SpriteRenderer[] spriteRenderers;
-
+	
 	virtual public void OnMouseUpAsButton(){
 		print (name);
 	}
-
+	
 	public bool faceUp{
 		get{
 			return(!back.activeSelf);		
@@ -35,9 +36,9 @@ public class Card : MonoBehaviour {
 	}
 	void Start () {
 		SetSortOrder (0);
-
+		
 	}
-
+	
 	private void PopulateSpriteRenderers(){
 		//if there are no sprite renderers
 		if (spriteRenderers == null || spriteRenderers.Length == 0) {
@@ -45,27 +46,27 @@ public class Card : MonoBehaviour {
 			spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
 		}
 	}
-
+	
 	public void SetSortingLayerName(string tSLN){
 		PopulateSpriteRenderers ();
-
+		
 		foreach (SpriteRenderer tSR in spriteRenderers) {
 			tSR.sortingLayerName=tSLN;		
 		}
 	}
-
+	
 	public void Move(Vector3 newPosition, float duration){
 		endPos = newPosition;
 		startTime = Time.time;
 		timeDuration = duration;
 	}
-
+	
 	public void Update(){
 		if (Time.time < startTime + timeDuration) {
 			transform.localPosition = Vector3.Lerp (transform.localPosition, endPos, (Time.time-startTime) / timeDuration);
 		}
 	}
-
+	
 	public void SetSortOrder(int sOrd){
 		PopulateSpriteRenderers ();
 		//iterate through all sprite renderers and set to following order:
@@ -89,7 +90,7 @@ public class Card : MonoBehaviour {
 			}
 		}
 	}
-
+	
 }
 
 [System.Serializable]
@@ -105,5 +106,5 @@ public class CardDefinition{
 	public string face;
 	public int rank;
 	public List<Decorator> pips = new List<Decorator>();
-
+	
 }

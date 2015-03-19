@@ -1,115 +1,106 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
-//tracks the states of
-public enum FSState
-{
-		idle,
-		pre,
-		active,
-		post
+//an enum to track the possible states of a FloatingScore
+public enum FSState{
+	idle,
+	pre,
+	active,
+	post
 }
 
-public class FloatingScore : MonoBehaviour
-{
-		public FSState state = FSState.idle;
-		[SerializeField]
-		private int
-				_score = 0;
-		public string scoreString;
+//FloatingScore can move itself on screen following a Bezier curve
+public class FloatingScore : MonoBehaviour {
+	public FSState state=FSState.idle;
+	[SerializeField]
+	private int _score=0;//the score field
+	private string scoreString;
 
-
-		//create a property to handle changing the string when score is changed
-		public int score {
-				get{ return _score;}
-				set {
-						_score = value;
-						scoreString = Utils.AddCommasToNumber (_score);
-						GetComponentInChildren<Text> ().text = scoreString;
-				}
+	//the scorre property also sets scoreString when set
+	public int score{
+		get{
+			return(_score);
 		}
+		set{
+			_score=value;
+			scoreString=Utils.AddCommasToNumber(_score);
+			GetComponent<GUIText>().text=scoreString;
+		}
+	}
 
-		public List<Vector3> bezierPts;
-		public List<float>	fontSizes;
-		public float timeStart = -1f, timeDuration = 1f;
-		public string easingCurve = Easing.InOut;
+	public List<Vector3> bezierPts;//Bezier points for movement
+	public List<float> fontSizes;//Bezier points for font scaling
+	public float timeStart = -1f;
+	public float timeDuration=1f;
+	public string easingCurve = Easing.InOut;//Uses Easing in Utils.cs
 
-		//this will receive the SendMessage
-		public GameObject reportFinishTo = null;
+	//The GameObject that will receive the SendMessage when this is done moving
+	public GameObject reportFinishTo = null;
 
-		public void Init (List<Vector3> ePts, float eTimeS=0, float eTimeD=1)
-		{
-				
-				//initialize list
-				bezierPts = new List<Vector3> (ePts);
+	//Set up the FloatingScore and movement
+	//Note the use of parameter defaults for eTimeS & eTimeD
+	public void Init(List<Vector3> ePts, float eTimeS=0,float eTimeD=1){
+		bezierPts = new List<Vector3> (ePts);
 
-				if (ePts.Count == 1) {//if only one point exists
-						//set transofrm to first point and get out
-						GetComponentInChildren<RectTransform> ().anchoredPosition = ePts [0];
-						return;
-				}
-				//start at current time if at default
-				if (eTimeS == 0)
+		if (ePts.Count == 1) {//if there's only one point
+						//...then just go there
+			transform.position=ePts[0];
+			return;
+		}
+		//if eTimeS is the default, just start at the current time
+		if (eTimeS == 0)
 						eTimeS = Time.time;
+		timeStart = eTimeS;
+		timeDuration = eTimeD;
 
-				timeStart = eTimeS;
-				timeDuration = eTimeD;
+		state = FSState.pre;//set it to the pre state, ready to start moving
+	}
 
-				//set it to pre state, before it starts moving
-				state = FSState.pre;
-		}
+	public void FSCallback(FloatingScore fs){
+		//when this callback is called by SendMessage,
+		//add the score from the calling FloatingScore
+		score += fs.score;
+	}
 
-		public void FSCallback (FloatingScore fs)
-		{
-				//when callback is called by send message, add the score from the calling to FloatingScore
-				score += fs.score;
-		}
-
-		public void Update ()
-		{
-				
-				//if not moving, get out
-				if (state == FSState.idle) {
-						GetComponentInChildren<RectTransform> ().anchoredPosition = bezierPts[bezierPts.Count-1];
+	//update is called once per frame
+	void Update(){
+				//if this is not moving, just return
+				if (state == FSState.idle)
 						return;
-				}
-				//get u from current time (0-1) usually
+				//get u from the current time and duration
+				//u ranges from 0 to 1 (usually)
 				float u = (Time.time - timeStart) / timeDuration;
-
+				//use Easing class from Utils to curve the u value
 				float uC = Easing.Ease (u, easingCurve);
-				if (u < 0) {//if u<0, we shouldn't move yet
+				if (u < 0) {//if u<0, then we shouldn't move yet
 						state = FSState.pre;
-			
-					
-						GetComponentInChildren<RectTransform> ().anchoredPosition = bezierPts [0];
-
-
+						//move to the initial point
+						transform.position = bezierPts [0];
 				} else {
-						if (u >= 1) {//we're done moving
-								uC = 1;
+						if (u >= 1) {//if u>=1, we're done moving
+								uC = 1;//set uC=1 so we don't overshoot
 								state = FSState.post;
-								if (reportFinishTo != null) {//if we have a callback object
-										//SendMessage to call FSCallback
+								if (reportFinishTo != null) {//if there's a callback GameObject use SendMessage
+										//to call the FSCallback method with this as the parameter.
 										reportFinishTo.SendMessage ("FSCallback", this);
-										//message sent, now destroy this game object
+										//now that the message has been sent, destroy this gameObject
 										Destroy (gameObject);
-								} else {//there is nothing to call back, idle
+								} else//if there's nothing to callback
+							//then don't destroy this.  Just let it stay still.
 										state = FSState.idle;
-								
-								}
-						} else { //0<=u<=1, we are actively moving
+						} else
+					//0<=u<1, which means that this is active and moving
 								state = FSState.active;
-						}
-						//use bezier curve to move this to right point
+						//use Bezier curve to move this to the right point
 						Vector3 pos = Utils.Bezier (uC, bezierPts);
-						GetComponentInChildren<RectTransform> ().anchoredPosition = pos;
-						if (fontSizes != null && fontSizes.Count > 0) {//if we have font sizes
+						transform.position = pos;
+						if (fontSizes != null && fontSizes.Count > 0) {
+								//if fontSizes has values in it, then adjust the fontSize of this GUIText
 								int size = Mathf.RoundToInt (Utils.Bezier (uC, fontSizes));
-								GetComponentInChildren<Text> ().fontSize = size;
+								GetComponent<GUIText> ().fontSize = size;
 						}
-					
 				}
 		}
 }

@@ -3,51 +3,57 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+//the Scoreboard class manages showing the score to the player
 public class Scoreboard : MonoBehaviour {
-	public static Scoreboard S;
+	public static Scoreboard S;//the singleton for Scoreboard
+
 	public GameObject prefabFloatingScore;
 
+	public bool _______________;
 	[SerializeField]
-	private int _score = 0;
-	private string _scoreString;
+	private int _score=0;
+	public string _scoreString;
 
-	//field for score
-	public int score{
-		get{ return _score;}
-		set{_score=value;
-			scoreString=Utils.AddCommasToNumber(_score);
+	//the score property also sets the scoreString
+	public int score {
+				get {
+						return(_score);
+				}
+				set {
+						_score = value;
+						scoreString = Utils.AddCommasToNumber (_score);
+				}
 		}
-	}
 
-	public string scoreString{
-		get{ return _scoreString;}
-		set{
-			_scoreString=value;
-			GetComponentInChildren<Text>().text = _scoreString;
+	//the scoreString property also sets the GUIText.text
+	public string scoreString {
+				get {
+						return(_scoreString);
+				}
+				set {
+						_scoreString = value;
+						GetComponent<GUIText> ().text = _scoreString;
+				}
 		}
-	}
 
 	void Awake(){
 		S = this;
 	}
 
-	void Update(){
-		S.GetComponentInChildren<RectTransform> ().anchoredPosition = new Vector2 (Screen.width*0.5f,Screen.height*0.65f);
-	}
-
-	//when called by SendMessage, this adds the fs.score to this score
+	//when called by SendMessage, this adds the fs.score to this.score
 	public void FSCallback(FloatingScore fs){
 		score += fs.score;
 	}
 
-	//This creates a new FloatingScore
+	///This will Instantiate a new FloatingScore GameObject and initialize it.
+	/// It also returns a pointer to the FloatingScore created so that the
+	/// calling function can do more with it (like set fontSizes, etc.)
 	public FloatingScore CreateFloatingScore(int amt, List<Vector3> pts){
-		GameObject go = Instantiate (prefabFloatingScore) as GameObject;
-		FloatingScore fs = go.GetComponentInChildren<FloatingScore> ();
+		GameObject go = Instantiate (prefabFloatingScore)as GameObject;
+		FloatingScore fs = go.GetComponent<FloatingScore> ();
 		fs.score = amt;
-		fs.reportFinishTo = this.gameObject;
+		fs.reportFinishTo = this.gameObject;//set fs to call back to this
 		fs.Init (pts);
-		return fs;
+		return(fs);
 	}
-
 }
