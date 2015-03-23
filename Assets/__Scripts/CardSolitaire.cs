@@ -97,6 +97,14 @@ public class CardSolitaire : Card {
 		}
 	}
 
+	void OnMouseEnter () {
+		if (SpiderSolitaire.S.Card == null) {
+			SpiderSolitaire.S.Card = this.gameObject;
+		}
+	}
+
+
+
 	public int GetTopSortOrder(){
 		//iterate through all sprite renderers and find the lowest sprite renderer sorting order to find the top layer of this card
 		int topLayer = 0;

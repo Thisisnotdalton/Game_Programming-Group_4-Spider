@@ -31,17 +31,20 @@ public class SpiderSolitaire : MonoBehaviour {
 	public float xOffset=3;
 	public float yOffset = -2.5f;
 	public Transform layoutAnchor;
+
+	public float speed = 1.5f;
+	private Vector3 cardPos;
 	
 	public CardSolitaire target;
 	public List<CardSolitaire> tableau;
 	public List<CardSolitaire> discardPile;
 	public List<CardSolitaire> drawPile;
+	public GameObject Card;
 	
 	void Awake(){
 		S = this; //Set up a Singleton for Prospector
 		
 	}
-	
 	
 	//Fields to track score info
 	public int chain=0;//of cards in this run
@@ -50,6 +53,7 @@ public class SpiderSolitaire : MonoBehaviour {
 	public FloatingScore fsRun;
 	
 	void Start(){
+		cardPos = transform.position;
 		deck = GetComponent<Deck> ();//Get the Deck
 		deck.InitDeck (deckXML.text);//Pass DeckXML to it
 		Deck.Shuffle (ref deck.cards);//this shuffles the deck
@@ -60,7 +64,22 @@ public class SpiderSolitaire : MonoBehaviour {
 		drawPile = ConvertListCardsToListCardSolitaires (deck.cards);
 		LayoutGame ();
 	}
+
+	void Update (){
+		if (Input.GetMouseButton(0)) {
+			cardPos = Input.mousePosition;
+			cardPos = Camera.main.ScreenToWorldPoint(cardPos);
+			if (Card != null) {
+				Card.transform.position = cardPos;
+			}
+		}
+
+		if (Input.GetMouseButtonUp (0)) {
+			Card = null;
+		}
+	}
 	
+
 	//the draw function will pull a single card from the drawPile and return it
 	CardSolitaire Draw(){
 		CardSolitaire cd = drawPile [0];//pull the 0th CardSolitaire
@@ -132,8 +151,8 @@ public class SpiderSolitaire : MonoBehaviour {
 		}
 		return(lCP);
 	}
-	
-	
+
+
 	//cardClicked is called any time a card in the game is clicked
 	public void CardClicked(CardSolitaire cd){
 		//the reaction is determined by the stated of the clicked card
