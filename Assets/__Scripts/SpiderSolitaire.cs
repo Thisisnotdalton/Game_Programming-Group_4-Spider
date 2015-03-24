@@ -40,7 +40,9 @@ public class SpiderSolitaire : MonoBehaviour {
 	public List<CardSolitaire> discardPile;
 	public List<CardSolitaire> drawPile;
 	public GameObject Card;
-	
+
+	public CardSolitaire[] firstRowOfCards;
+	public Transform[] slotPositions;
 	void Awake(){
 		S = this; //Set up a Singleton for Prospector
 		
@@ -68,15 +70,17 @@ public class SpiderSolitaire : MonoBehaviour {
 	void Update (){
 		if (Input.GetMouseButton(0)) {
 			cardPos = Input.mousePosition;
+
 			cardPos = Camera.main.ScreenToWorldPoint(cardPos);
 			if (Card != null) {
+				cardPos.z = Card.transform.position.z;
 				Card.transform.position = cardPos;
 			}
 		}
-
+		/*
 		if (Input.GetMouseButtonUp (0)) {
 			Card = null;
-		}
+		}*/
 	}
 	
 
@@ -111,10 +115,20 @@ public class SpiderSolitaire : MonoBehaviour {
 		}
 		
 		CardSolitaire cp;
+		//initialize first row of cards array
+		slotPositions = new Transform[10];
+		firstRowOfCards = new CardSolitaire[slotPositions.Length];
+		int slotCards = 0;
 		//follow the layout
 		foreach (SlotDef tSD in layout.slotDefs) {
 			//^Iterate through all the SlotDefs in the layout.slotDefs as tSD
 			cp=Draw ();//pull a card from the top (beginning) of the drawPile
+			if(tSD.type=="slot"){
+				firstRowOfCards[slotCards]=cp;
+				slotPositions[slotCards]=cp.transform;
+				cp.faceUp=false;
+				slotCards++;
+			}
 			cp.faceUp=tSD.faceUp;//set its faceUp to the value in slotDef
 			cp.transform.parent=layoutAnchor;//make its parent layoutAnchor
 			//this replaces the previous parent: deck.deckAnchor, which appears as _Deck in the Hierarchy when the scene is playing.
@@ -129,7 +143,9 @@ public class SpiderSolitaire : MonoBehaviour {
 			
 			tableau.Add(cp);//add this CardSolitaire to the List<> tableau
 		}
+
 		
+		/*
 		//Set which cards are hiding others
 		foreach (CardSolitaire tCP in tableau) {
 			foreach(int hid in tCP.slotDef.hiddenBy){
@@ -137,7 +153,23 @@ public class SpiderSolitaire : MonoBehaviour {
 				tCP.hiddenBy.Add(cp);
 			}
 		}
-		
+		*/
+
+		//add other cards to stack
+		for (int i = 0; i < 3 * firstRowOfCards.Length + 4; i++) {
+			//get bottom of current card
+			CardSolitaire bottomCard=firstRowOfCards[i%firstRowOfCards.Length].BottomOfStack();
+			//flip this card over
+			bottomCard.faceUp=false;
+			//add this card to that stack
+			CardSolitaire tempCard = Draw();
+			//tempCard.transform.Find("back").GetComponent<SpriteRenderer>().sortingLayerName = bottomCard.GetSortingOrderLayerName();
+			tempCard.SetSortingLayerName(bottomCard.GetSortingOrderLayerName());
+			//set its row
+			tempCard.Join(bottomCard);
+		} 
+
+
 		//set up the Draw pile
 		UpdateDrawPile ();
 	}

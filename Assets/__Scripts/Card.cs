@@ -15,7 +15,9 @@ public class Card : MonoBehaviour {
 	
 	public GameObject back;
 	public CardDefinition def;
-	
+
+	private bool containsBack=false;
+
 	//movement variables
 	private float startTime=0, timeDuration=0;
 	private Vector3 endPos=Vector3.zero;
@@ -23,7 +25,7 @@ public class Card : MonoBehaviour {
 	public SpriteRenderer[] spriteRenderers;
 	
 	virtual public void OnMouseUpAsButton(){
-		print (name);
+		//print (name);
 	}
 	
 	public bool faceUp{
@@ -41,20 +43,40 @@ public class Card : MonoBehaviour {
 	
 	private void PopulateSpriteRenderers(){
 		//if there are no sprite renderers
-		if (spriteRenderers == null || spriteRenderers.Length == 0) {
+		if (!containsBack||spriteRenderers == null || spriteRenderers.Length == 0) {
 			//get the sprite renderer components
-			spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+			//spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
+			List<SpriteRenderer> spriteList = new List<SpriteRenderer>();
+			foreach (Transform t in GetComponentsInChildren<Transform>()) {
+				if(t.GetComponent<SpriteRenderer>()!=null){
+					spriteList.Add(t.GetComponent<SpriteRenderer>());
+					if(t.name=="back"){
+						containsBack=true;
+					}
+				}
+			}
+			spriteList.Add(transform.Find("back").GetComponent<SpriteRenderer>());
+			spriteRenderers=spriteList.ToArray();
+
 		}
 	}
 	
 	public void SetSortingLayerName(string tSLN){
 		PopulateSpriteRenderers ();
-		
+		//print ("Set sorting layer name to " + tSLN);
 		foreach (SpriteRenderer tSR in spriteRenderers) {
-			tSR.sortingLayerName=tSLN;		
+			tSR.sortingLayerName=tSLN;	
+
+			//print("Sorting layer name set to "+tSR.name+" - "+tSR.sortingLayerName);
 		}
+
 	}
-	
+
+	public string GetSortingOrderLayerName(){
+		PopulateSpriteRenderers ();
+		return spriteRenderers[0].sortingLayerName;
+	}
+
 	public void Move(Vector3 newPosition, float duration){
 		endPos = newPosition;
 		startTime = Time.time;
