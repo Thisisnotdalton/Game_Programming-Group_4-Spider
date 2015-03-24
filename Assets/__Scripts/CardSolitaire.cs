@@ -62,7 +62,7 @@ public class CardSolitaire : Card {
 					this.Move (lastPosition, .5f);
 				}
 			} else {
-				lastCard.faceUp=true;
+				if(lastCard!=null)lastCard.faceUp=true;
 				Join (targetCard);
 				//print ("Good job");
 			}
