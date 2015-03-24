@@ -44,7 +44,7 @@ public class CardSolitaire : Card {
 			}
 			SpiderSolitaire.S.Card = this.gameObject;
 			SetSortingLayerName("Draw");
-			SetSortOrder(1000);
+			RejoinCards();
 		}
 	}
 
@@ -53,12 +53,13 @@ public class CardSolitaire : Card {
 			print ("This target card has been dropped");
 			SpiderSolitaire.S.Card=null;
 			if (targetCard == null || !targetCard.LesserRank (this)) {
-				this.Move (lastPosition, .5f);
 
 				print ("Invalid placement.");
 				if (lastCard != null) {
 					Join (lastCard);
 					print ("Joining to "+lastCard.name);
+				}else{
+					this.Move (lastPosition, .5f);
 				}
 			} else {
 				lastCard.faceUp=true;
@@ -70,7 +71,8 @@ public class CardSolitaire : Card {
 
 	public void OnTriggerEnter(Collider other){
 		//get CardSolitaire
-		if (SpiderSolitaire.S.Card!= null && SpiderSolitaire.S.Card.name==name && other.GetComponent<CardSolitaire> ().lesserCard == null) {
+		if (SpiderSolitaire.S.Card!= null && SpiderSolitaire.S.Card.name==name &&
+		    other.GetComponent<CardSolitaire> ().lesserCard == null && other.GetComponent<CardSolitaire> ().faceUp ) {
 			targetCard=other.GetComponent<CardSolitaire>();
 			print("New target card:"+targetCard.name);
 		}
@@ -105,6 +107,7 @@ public class CardSolitaire : Card {
 	void Split(){
 		//update last position and card
 		lastPosition = transform.position;
+		print ("Last position:" + lastPosition);
 		lastCard = greaterCard;
 		//unlink card above from this card
 		greaterCard.lesserCard = null;
@@ -131,9 +134,18 @@ public class CardSolitaire : Card {
 		pos.y -=1; //offset y so the card above is slightly visible
 		pos.z += 1;//this card is one above the other card
 	*/	transform.localPosition = pos; //store this into local position
-		SetSortingLayerName ("Row"+row);
+		print ("Local position:" + transform.localPosition);
 
-		//SetSortOrder (greaterCard.GetTopSortOrder () + 3); //set this card to be the layer above the card it's on top of
+		if (greaterCard == null) {
+			SetSortingLayerName("Draw");
+		} else {
+			SetSortingLayerName ((greaterCard.GetSortingOrderLayerName ().StartsWith ("Row") ? "Row" + row : "Draw"));
+
+			if (GetSortingOrderLayerName ().Equals ("Draw")) {
+				SetSortOrder (greaterCard.GetTopSortOrder () + 3); //set this card to be the layer above the card it's on top of			
+			}
+		}
+
 		CheckForCompleteStack (); //check if the newly formed stack is complete
 	}
 	
@@ -143,9 +155,15 @@ public class CardSolitaire : Card {
 		int highestRank, LowestRank;
 		//card object for traversing linked list of cards
 		CardSolitaire currentCard = this;
+		
+		bool[] cardsInStack=new bool[13];
+		cardsInStack [rank-1] = true;
 		//find greatest card
 		while (currentCard.greaterCard!=null) {
-			currentCard=currentCard.greaterCard;
+			if(cardsInStack[currentCard.rank-1]&&currentCard.greaterCard.LesserRank(currentCard)){
+				currentCard=currentCard.greaterCard;
+				cardsInStack [currentCard.rank-1] = true;
+			}else{break;}
 		}
 		//assign rank to greatest
 		highestRank = currentCard.rank;
@@ -153,12 +171,16 @@ public class CardSolitaire : Card {
 		currentCard = this;
 		//look for least rank
 		while (currentCard.lesserCard!=null) {
-			currentCard=currentCard.lesserCard;
+			if(cardsInStack[currentCard.rank-1]&&currentCard.LesserRank(currentCard.lesserCard)){
+				currentCard=currentCard.lesserCard;
+			cardsInStack [currentCard.rank-1] = true;
+		}else{break;}
 		}
+		
 		//assign to lowest
 		LowestRank = currentCard.rank;
 		
-		if (highestRank == 13 && LowestRank == 1) {
+		if (cardsInStack[0]&&cardsInStack[cardsInStack.Length-1]){//(highestRank == 13 && LowestRank == 1) {
 			//move cards out of way and remove stack
 			while(currentCard.greaterCard!=null){
 				//remove parent link to greater card/stack
@@ -182,29 +204,25 @@ public class CardSolitaire : Card {
 		}
 	}
 */
-	/*
-	public bool Equals(Object other){
-		if (other.GetType != this.GetType) {
-			return false;
+	//rejoin all lower cards
+	private void RejoinCards(){
+		CardSolitaire temp = this;
+		while (temp.lesserCard!=null) {
+			temp.lesserCard.Join(temp);
+			temp=temp.lesserCard;
 		}
-		CardSolitaire otherCard = (CardSolitaire)(other);
-		if (otherCard.name != name) {
-			return false;
-		}
-		if (otherCard.transform.position != this.transform.position) {
-			return false;
-		}
-		return true;
 	}
 
 
 	public int GetTopSortOrder(){
 		//iterate through all sprite renderers and find the lowest sprite renderer sorting order to find the top layer of this card
-		int topLayer = spriteRenderers[0].sortingOrder;
+		/*int topLayer = spriteRenderers[0].sortingOrder;
 		foreach (SpriteRenderer tSR in spriteRenderers) {
 				topLayer=(tSR.sortingOrder<topLayer?topLayer:tSR.sortingOrder);
 		}
 		return topLayer;
+	*/
+		return transform.Find ("back").GetComponent<SpriteRenderer> ().sortingOrder;
 	}
 	
 }

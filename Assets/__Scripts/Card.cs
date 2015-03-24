@@ -16,7 +16,6 @@ public class Card : MonoBehaviour {
 	public GameObject back;
 	public CardDefinition def;
 
-	private bool containsBack=false;
 
 	//movement variables
 	private float startTime=0, timeDuration=0;
@@ -43,16 +42,14 @@ public class Card : MonoBehaviour {
 	
 	private void PopulateSpriteRenderers(){
 		//if there are no sprite renderers
-		if (!containsBack||spriteRenderers == null || spriteRenderers.Length == 0) {
+		if (spriteRenderers == null || spriteRenderers.Length == 0) {
 			//get the sprite renderer components
 			//spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
 			List<SpriteRenderer> spriteList = new List<SpriteRenderer>();
 			foreach (Transform t in GetComponentsInChildren<Transform>()) {
 				if(t.GetComponent<SpriteRenderer>()!=null){
 					spriteList.Add(t.GetComponent<SpriteRenderer>());
-					if(t.name=="back"){
-						containsBack=true;
-					}
+			
 				}
 			}
 			spriteList.Add(transform.Find("back").GetComponent<SpriteRenderer>());
