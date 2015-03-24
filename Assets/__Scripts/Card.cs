@@ -82,7 +82,8 @@ public class Card : MonoBehaviour {
 	
 	public void Update(){
 		if (Time.time < startTime + timeDuration) {
-			transform.localPosition = Vector3.Lerp (transform.localPosition, endPos, (Time.time-startTime) / timeDuration);
+			//transform.localPosition = Vector3.Lerp (transform.localPosition, endPos, (Time.time-startTime) / timeDuration);
+			transform.position=Vector3.Lerp(transform.position,endPos,(Time.time-startTime) / timeDuration);
 		}
 	}
 	

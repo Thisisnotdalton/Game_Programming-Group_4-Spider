@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 //an enum to handle all the possible scoring events
@@ -31,7 +32,7 @@ public class SpiderSolitaire : MonoBehaviour {
 	public float xOffset=3;
 	public float yOffset = -2.5f;
 	public Transform layoutAnchor;
-
+	
 	public float speed = 1.5f;
 	private Vector3 cardPos;
 	
@@ -40,7 +41,7 @@ public class SpiderSolitaire : MonoBehaviour {
 	public List<CardSolitaire> discardPile;
 	public List<CardSolitaire> drawPile;
 	public GameObject Card;
-
+	
 	public CardSolitaire[] firstRowOfCards;
 	public Transform[] slotPositions;
 	void Awake(){
@@ -66,11 +67,11 @@ public class SpiderSolitaire : MonoBehaviour {
 		drawPile = ConvertListCardsToListCardSolitaires (deck.cards);
 		LayoutGame ();
 	}
-
+	
 	void Update (){
 		if (Input.GetMouseButton(0)) {
 			cardPos = Input.mousePosition;
-
+			
 			cardPos = Camera.main.ScreenToWorldPoint(cardPos);
 			if (Card != null) {
 				cardPos.z = Card.transform.position.z;
@@ -83,7 +84,14 @@ public class SpiderSolitaire : MonoBehaviour {
 		}*/
 	}
 	
-
+	public void DrawMoreCards(){
+		for(int i = 0; i< 10&& i < drawPile.Count;i++){
+			CardSolitaire cd = Draw();
+			cd.faceUp=true;
+			cd.Join(firstRowOfCards[i].BottomOfStack(),true);
+		}
+	}
+	
 	//the draw function will pull a single card from the drawPile and return it
 	CardSolitaire Draw(){
 		CardSolitaire cd = drawPile [0];//pull the 0th CardSolitaire
@@ -143,7 +151,7 @@ public class SpiderSolitaire : MonoBehaviour {
 			
 			tableau.Add(cp);//add this CardSolitaire to the List<> tableau
 		}
-
+		
 		
 		/*
 		//Set which cards are hiding others
@@ -154,7 +162,7 @@ public class SpiderSolitaire : MonoBehaviour {
 			}
 		}
 		*/
-
+		
 		//add other cards to stack
 		for (int i = 0; i < 3 * firstRowOfCards.Length + 4; i++) {
 			//get bottom of current card
@@ -168,8 +176,8 @@ public class SpiderSolitaire : MonoBehaviour {
 			//set its row
 			tempCard.Join(bottomCard);
 		} 
-
-
+		
+		
 		//set up the Draw pile
 		UpdateDrawPile ();
 	}
@@ -183,8 +191,8 @@ public class SpiderSolitaire : MonoBehaviour {
 		}
 		return(lCP);
 	}
-
-
+	
+	
 	//cardClicked is called any time a card in the game is clicked
 	public void CardClicked(CardSolitaire cd){
 		//the reaction is determined by the stated of the clicked card

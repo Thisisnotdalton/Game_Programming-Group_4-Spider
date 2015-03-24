@@ -25,50 +25,57 @@ public class CardSolitaire : Card {
 	private CardSolitaire targetCard;
 	//keep track of which column this card is in
 	public int row=0;
-
+	
 	//boolean to determine if the card is still active/moveable
 	private bool active=true;
-
+	
 	void Awake(){
 		lesserCard = null;
 		greaterCard = null;
 		targetCard = null;
 	}
-
-
+	
+	public void OnMouseUpAsButton(){
+		if (GetSortingOrderLayerName () == "Discard") {
+			SpiderSolitaire.S.DrawMoreCards();
+		}
+	}
+	
 	public void OnMouseDown(){
 		//pair card with mouse
-		if (SpiderSolitaire.S.Card == null && faceUp) {
+		if (active&&SpiderSolitaire.S.Card == null && faceUp&&DescendingColumn()) {
 			if(greaterCard!=null){
 				Split();
 			}
 			SpiderSolitaire.S.Card = this.gameObject;
-			SetSortingLayerName("Draw");
+			SetSortingLayerName("PickedUp");
 			RejoinCards();
 		}
 	}
-
+	
 	public void OnMouseUp(){
 		if (SpiderSolitaire.S.Card!= null && SpiderSolitaire.S.Card.name == name) {
 			print ("This target card has been dropped");
 			SpiderSolitaire.S.Card=null;
 			if (targetCard == null || !targetCard.LesserRank (this)) {
-
+				
 				print ("Invalid placement.");
 				if (lastCard != null) {
-					Join (lastCard);
+					Join (lastCard,true);
+					RejoinCards();
 					print ("Joining to "+lastCard.name);
 				}else{
 					this.Move (lastPosition, .5f);
 				}
 			} else {
 				if(lastCard!=null)lastCard.faceUp=true;
-				Join (targetCard);
+				Join (targetCard,true);
+				RejoinCards();
 				//print ("Good job");
 			}
 		}
 	}
-
+	
 	public void OnTriggerEnter(Collider other){
 		//get CardSolitaire
 		if (SpiderSolitaire.S.Card!= null && SpiderSolitaire.S.Card.name==name &&
@@ -77,16 +84,16 @@ public class CardSolitaire : Card {
 			print("New target card:"+targetCard.name);
 		}
 	}
-
+	
 	public void OnTriggerLeave(Collider other){
 		if (greaterCard == null && targetCard != null) {
-
+			
 			if (other.gameObject.GetComponent<CardSolitaire>()!=null && other.gameObject.GetComponent<CardSolitaire> () == targetCard) {
 				targetCard = null;
 			}
 		}
 	}
-
+	
 	//return the last card, furthest down in this stack
 	public CardSolitaire BottomOfStack(){
 		if (lesserCard == null) {
@@ -94,10 +101,15 @@ public class CardSolitaire : Card {
 		} else {
 			return lesserCard.BottomOfStack();
 		}
-			
+		
 	}
-
-
+	
+	public bool DescendingColumn(){
+		if (lesserCard == null|| (LesserRank (lesserCard) && lesserCard.DescendingColumn ())) {
+			return true;
+		}
+		return false;
+	}
 	//Returns true if the other card may be placed on this card, i.e. the other card is a lesser adjacent rank
 	bool LesserRank (CardSolitaire other) {
 		return (other.rank == this.rank - 1);
@@ -118,7 +130,7 @@ public class CardSolitaire : Card {
 	}
 	
 	//Join this card to a stack with a card of higher rank
-	public void Join(CardSolitaire other){
+	public void Join(CardSolitaire other, bool lerp=false){
 		//link greater card to us
 		other.lesserCard = this;
 		//link ourselves to the greater card
@@ -129,23 +141,22 @@ public class CardSolitaire : Card {
 		transform.parent = greaterCard.transform;
 		//align this card to the one above it
 		Vector3 pos = new Vector3(0,-1,0.125f);
-	/*
-		pos.x = 0; //they are in line now
-		pos.y -=1; //offset y so the card above is slightly visible
-		pos.z += 1;//this card is one above the other card
-	*/	transform.localPosition = pos; //store this into local position
-		print ("Local position:" + transform.localPosition);
-
-		if (greaterCard == null) {
-			SetSortingLayerName("Draw");
+		if (lerp) {
+			Move (pos + transform.parent.position, 0.5f);
 		} else {
-			SetSortingLayerName ((greaterCard.GetSortingOrderLayerName ().StartsWith ("Row") ? "Row" + row : "Draw"));
-
-			if (GetSortingOrderLayerName ().Equals ("Draw")) {
+			transform.localPosition=pos;
+		}
+		
+		if (greaterCard == null) {
+			SetSortingLayerName("Row0");
+		} else {
+			SetSortingLayerName ((greaterCard.GetSortingOrderLayerName ().StartsWith ("Row") ? "Row" + row : "PickedUp"));
+			
+			if (GetSortingOrderLayerName ().Equals ("PickedUp")&&greaterCard!=null) {
 				SetSortOrder (greaterCard.GetTopSortOrder () + 3); //set this card to be the layer above the card it's on top of			
 			}
 		}
-
+		
 		CheckForCompleteStack (); //check if the newly formed stack is complete
 	}
 	
@@ -173,8 +184,8 @@ public class CardSolitaire : Card {
 		while (currentCard.lesserCard!=null) {
 			if(cardsInStack[currentCard.rank-1]&&currentCard.LesserRank(currentCard.lesserCard)){
 				currentCard=currentCard.lesserCard;
-			cardsInStack [currentCard.rank-1] = true;
-		}else{break;}
+				cardsInStack [currentCard.rank-1] = true;
+			}else{break;}
 		}
 		
 		//assign to lowest
@@ -186,18 +197,22 @@ public class CardSolitaire : Card {
 				//remove parent link to greater card/stack
 				currentCard.transform.parent=null;
 				//move card to discard area
-				currentCard.Move(Vector3.zero,0.25f);
+				currentCard.Move(new Vector3(0,-8,0),0.25f);
 				//set card to inactive
 				currentCard.active=false;
+				if(currentCard.rank==13){
+					currentCard.greaterCard.faceUp=true;
+					break;
+				}
 				//select next card
 				currentCard=currentCard.greaterCard;
 				
 			}
 			currentCard.active=false;
-			currentCard.Move(Vector3.zero,0.25f);
+			currentCard.Move(new Vector3(0,-8,0),0.25f);
 		}
 	}
-/*
+	/*
 	void OnMouseEnter () {
 		if (SpiderSolitaire.S.Card == null) {
 			SpiderSolitaire.S.Card = this.gameObject;
@@ -212,8 +227,8 @@ public class CardSolitaire : Card {
 			temp=temp.lesserCard;
 		}
 	}
-
-
+	
+	
 	public int GetTopSortOrder(){
 		//iterate through all sprite renderers and find the lowest sprite renderer sorting order to find the top layer of this card
 		/*int topLayer = spriteRenderers[0].sortingOrder;
