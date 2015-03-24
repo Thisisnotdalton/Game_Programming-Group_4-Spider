@@ -82,8 +82,15 @@ public class SpiderSolitaire : MonoBehaviour {
 			Card = null;
 		}*/
 	}
-	
 
+	public void DrawMoreCards(){
+		for(int i = 0; i< 10&& i < drawPile.Count;i++){
+			CardSolitaire cd = Draw();
+			cd.faceUp=true;
+			cd.Join(firstRowOfCards[i].BottomOfStack());
+		}
+	}
+	
 	//the draw function will pull a single card from the drawPile and return it
 	CardSolitaire Draw(){
 		CardSolitaire cd = drawPile [0];//pull the 0th CardSolitaire

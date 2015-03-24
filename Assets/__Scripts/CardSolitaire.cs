@@ -35,6 +35,11 @@ public class CardSolitaire : Card {
 		targetCard = null;
 	}
 
+	public void OnMouseUpAsButton(){
+		if (GetSortingOrderLayerName () == "Discard") {
+			SpiderSolitaire.S.DrawMoreCards();
+		}
+	}
 
 	public void OnMouseDown(){
 		//pair card with mouse
@@ -43,7 +48,7 @@ public class CardSolitaire : Card {
 				Split();
 			}
 			SpiderSolitaire.S.Card = this.gameObject;
-			SetSortingLayerName("Draw");
+			SetSortingLayerName("PickedUp");
 			RejoinCards();
 		}
 	}
@@ -134,14 +139,15 @@ public class CardSolitaire : Card {
 		pos.y -=1; //offset y so the card above is slightly visible
 		pos.z += 1;//this card is one above the other card
 	*/	transform.localPosition = pos; //store this into local position
-		print ("Local position:" + transform.localPosition);
+		//Move (pos, 0.5f);
+		//print ("Local position:" + transform.localPosition);
 
 		if (greaterCard == null) {
-			SetSortingLayerName("Draw");
+			//SetSortingLayerName("Draw");
 		} else {
-			SetSortingLayerName ((greaterCard.GetSortingOrderLayerName ().StartsWith ("Row") ? "Row" + row : "Draw"));
+			SetSortingLayerName ((greaterCard.GetSortingOrderLayerName ().StartsWith ("Row") ? "Row" + row : "PickedUp"));
 
-			if (GetSortingOrderLayerName ().Equals ("Draw")) {
+			if (GetSortingOrderLayerName ().Equals ("PickedUp")) {
 				SetSortOrder (greaterCard.GetTopSortOrder () + 3); //set this card to be the layer above the card it's on top of			
 			}
 		}
